@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="SalesPerformanceManagement.tests/SalesPerformanceManagement.tests.csproj" Id="fb1534c8-3ef0-47b3-ada1-76022d1d60c4" />
   <Project Path="SalesPerformanceManagement/SalesPerformanceManagement.csproj" />
 </Solution>
