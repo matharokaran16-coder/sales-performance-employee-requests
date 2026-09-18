@@ -1,7 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using SalesPerformanceManagement.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+string connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "DefaultConnection was not found.");
+
+builder.Services.AddDbContext<ApplicationDbContext>(ConfigureDatabase);
 
 var app = builder.Build();
 
@@ -25,3 +35,9 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+
+void ConfigureDatabase(DbContextOptionsBuilder options)
+{
+    options.UseSqlServer(connectionString);
+}
