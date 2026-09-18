@@ -15,6 +15,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(ConfigureDatabase);
 
 var app = builder.Build();
 
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    ApplicationDbContext context =
+        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    DbInitializer.Initialize(context);
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
