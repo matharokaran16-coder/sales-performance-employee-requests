@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SalesPerformanceManagement.Models
@@ -27,9 +28,11 @@ namespace SalesPerformanceManagement.Models
         public DateTime DecisionDate { get; set; }
 
         [ForeignKey("RequestId")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public Request? Request { get; set; }
 
         [ForeignKey("ManagerId")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public User? Manager { get; set; }
     }
 }

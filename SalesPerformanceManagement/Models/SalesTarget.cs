@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SalesPerformanceManagement.Models
@@ -31,6 +32,7 @@ namespace SalesPerformanceManagement.Models
         public DateTime EndDate { get; set; }
 
         [ForeignKey("AssignedBy")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public User? AssignedByUser { get; set; }
     }
 }

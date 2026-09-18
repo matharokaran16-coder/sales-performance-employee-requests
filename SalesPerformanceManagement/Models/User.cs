@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SalesPerformanceManagement.Models
@@ -32,8 +33,12 @@ namespace SalesPerformanceManagement.Models
         [Column("is_active")]
         public bool IsActive { get; set; } = true;
 
+        [ForeignKey("RoleId")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public Role? Role { get; set; }
 
+        [ForeignKey("DepartmentId")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public Department? Department { get; set; }
     }
 }

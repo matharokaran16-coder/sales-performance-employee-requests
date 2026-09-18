@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SalesPerformanceManagement.Models
@@ -19,9 +20,11 @@ namespace SalesPerformanceManagement.Models
         public int TargetId { get; set; }
 
         [ForeignKey("UserId")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public User? User { get; set; }
 
         [ForeignKey("TargetId")]
+        [DeleteBehavior(DeleteBehavior.NoAction)]
         public SalesTarget? SalesTarget { get; set; }
     }
 }
