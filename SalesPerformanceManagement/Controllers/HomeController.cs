@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using SalesPerformanceManagement.Models;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SalesPerformanceManagement.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

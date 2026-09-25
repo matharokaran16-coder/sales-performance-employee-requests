@@ -1,0 +1,56 @@
+﻿@model SalesPerformanceManagement.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="login-page">
+    <div class="login-card">
+
+        <h1 class="login-title">
+            Sales Performance
+        </h1>
+
+        <p class="login-subtitle">
+            Employee Management System
+        </p>
+
+        <form asp-action="Login" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger login-error">
+            </div>
+
+            <div class="login-field">
+                <label asp-for="Username"></label>
+
+                <input asp-for="Username"
+                       class="login-input"
+                       placeholder="Enter username" />
+
+                <span asp-validation-for="Username"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <div class="login-field">
+                <label asp-for="Password"></label>
+
+                <input asp-for="Password"
+                       class="login-input"
+                       placeholder="Enter password" />
+
+                <span asp-validation-for="Password"
+                      class="text-danger">
+                </span>
+            </div>
+
+            <button type="submit"
+                    class="login-button">
+                Login
+            </button>
+
+        </form>
+
+    </div>
+</div>

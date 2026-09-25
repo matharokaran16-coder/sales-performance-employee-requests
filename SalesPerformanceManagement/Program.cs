@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SalesPerformanceManagement.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,9 @@ string connectionString =
         "DefaultConnection was not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(ConfigureDatabase);
-
+builder.Services
+    .AddAuthentication("CapstoneCookie")
+    .AddCookie("CapstoneCookie", ConfigureCookie);
 var app = builder.Build();
 
 using (IServiceScope scope = app.Services.CreateScope())
@@ -36,11 +39,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();
 
@@ -48,4 +52,11 @@ app.Run();
 void ConfigureDatabase(DbContextOptionsBuilder options)
 {
     options.UseSqlServer(connectionString);
+}
+void ConfigureCookie(CookieAuthenticationOptions options)
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+    options.SlidingExpiration = true;
 }

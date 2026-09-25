@@ -20,3 +20,72 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.login-page {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    width: 420px;
+    padding: 40px;
+    background-color: #1f2937;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+.login-title {
+    color: white;
+    text-align: center;
+    margin-bottom: 5px;
+    font-size: 28px;
+}
+
+.login-subtitle {
+    color: #cbd5e1;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.login-field {
+    margin-bottom: 20px;
+}
+
+    .login-field label {
+        display: block;
+        color: white;
+        margin-bottom: 7px;
+    }
+
+.login-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #64748b;
+    border-radius: 6px;
+    background-color: #f8fafc;
+}
+
+    .login-input:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+    .login-button:hover {
+        background-color: #1d4ed8;
+    }
+
+.login-error {
+    margin-bottom: 15px;
+}
