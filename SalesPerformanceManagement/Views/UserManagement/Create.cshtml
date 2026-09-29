@@ -1,0 +1,103 @@
+﻿@model SalesPerformanceManagement.ViewModels.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<div class="employee-form-page">
+
+    <div class="employee-form-card">
+
+        <div class="employee-form-header">
+            <h2>Create Employee</h2>
+            <p>Add a new employee account to the system</p>
+        </div>
+
+        <form asp-action="Create" method="post">
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="Name">Employee Name</label>
+
+                <input asp-for="Name"
+                       class="employee-form-control"
+                       placeholder="Enter employee name" />
+
+                <span asp-validation-for="Name"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="Email">Work Email</label>
+
+                <input asp-for="Email"
+                       class="employee-form-control"
+                       placeholder="Enter work email" />
+
+                <span asp-validation-for="Email"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="Password">Password</label>
+
+                <input asp-for="Password"
+                       class="employee-form-control"
+                       placeholder="Enter password" />
+
+                <span asp-validation-for="Password"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="RoleId">Role</label>
+
+                <select asp-for="RoleId"
+                        asp-items="ViewBag.Roles"
+                        class="employee-form-control">
+
+                    <option value="">Select employee role</option>
+
+                </select>
+
+                <span asp-validation-for="RoleId"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="DepartmentId">Department</label>
+
+                <select asp-for="DepartmentId"
+                        asp-items="ViewBag.Departments"
+                        class="employee-form-control">
+
+                    <option value="">Select department</option>
+
+                </select>
+
+                <span asp-validation-for="DepartmentId"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-actions">
+
+                <a asp-action="Index"
+                   class="employee-cancel-button">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="employee-submit-button">
+                    Create Employee
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

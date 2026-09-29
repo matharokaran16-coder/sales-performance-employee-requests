@@ -3,7 +3,22 @@
 }
 
 <div class="container mt-4">
+
     <h1>User Management</h1>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
     <p>HR Manager access confirmed.</p>
+
+    <a asp-controller="UserManagement"
+       asp-action="Create"
+       class="btn btn-primary">
+        Create User
+    </a>
+
 </div>

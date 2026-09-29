@@ -89,3 +89,102 @@ body {
 .login-error {
     margin-bottom: 15px;
 }
+
+.employee-form-page {
+    min-height: 75vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.employee-form-card {
+    width: 100%;
+    max-width: 650px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+}
+
+.employee-form-header {
+    background-color: #1f2937;
+    padding: 28px 35px;
+}
+
+    .employee-form-header h2 {
+        color: white;
+        margin: 0;
+        font-size: 28px;
+    }
+
+    .employee-form-header p {
+        color: #cbd5e1;
+        margin-top: 6px;
+        margin-bottom: 0;
+    }
+
+.employee-form-card form {
+    padding: 35px;
+}
+
+.employee-form-group {
+    margin-bottom: 22px;
+}
+
+    .employee-form-group label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+.employee-form-control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: #f8fafc;
+}
+
+    .employee-form-control:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+    }
+
+.employee-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.employee-submit-button {
+    padding: 11px 22px;
+    border: none;
+    border-radius: 6px;
+    background-color: #2563eb;
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+    .employee-submit-button:hover {
+        background-color: #1d4ed8;
+        color: white;
+    }
+
+.employee-cancel-button {
+    padding: 11px 22px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: white;
+    color: #334155;
+    text-decoration: none;
+}
+
+    .employee-cancel-button:hover {
+        background-color: #f1f5f9;
+        color: #1f2937;
+    }
