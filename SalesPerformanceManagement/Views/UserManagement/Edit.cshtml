@@ -1,0 +1,103 @@
+﻿@model SalesPerformanceManagement.ViewModels.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="employee-form-page">
+
+    <div class="employee-form-card">
+
+        <div class="employee-form-header">
+            <h2>Edit Employee</h2>
+            <p>Update employee account information</p>
+        </div>
+
+        <form asp-action="Edit" method="post">
+
+            <input type="hidden" asp-for="UserId" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-3">
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="Name">Employee Name</label>
+
+                <input asp-for="Name"
+                       class="employee-form-control" />
+
+                <span asp-validation-for="Name"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="Email">Work Email</label>
+
+                <input asp-for="Email"
+                       class="employee-form-control" />
+
+                <span asp-validation-for="Email"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="NewPassword">New Password</label>
+
+                <input asp-for="NewPassword"
+                       class="employee-form-control"
+                       placeholder="Leave blank to keep current password" />
+
+                <span asp-validation-for="NewPassword"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="RoleId">Role</label>
+
+                <select asp-for="RoleId"
+                        asp-items="ViewBag.Roles"
+                        class="employee-form-control">
+
+                    <option value="">Select employee role</option>
+
+                </select>
+
+                <span asp-validation-for="RoleId"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-group">
+                <label asp-for="DepartmentId">Department</label>
+
+                <select asp-for="DepartmentId"
+                        asp-items="ViewBag.Departments"
+                        class="employee-form-control">
+
+                    <option value="">Select department</option>
+
+                </select>
+
+                <span asp-validation-for="DepartmentId"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="employee-form-actions">
+
+                <a asp-action="Index"
+                   class="employee-cancel-button">
+                    Cancel
+                </a>
+
+                <button type="submit"
+                        class="employee-submit-button">
+                    Save Changes
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

@@ -119,7 +119,37 @@ namespace SalesPerformanceManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        private void LoadDropdownLists()
+        [HttpGet]
+        public IActionResult Edit(int id)
+        {
+            User? user =
+                (from existingUser in _context.Users
+                 where existingUser.UserId == id
+                 select existingUser)
+                .FirstOrDefault();
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            EditUserViewModel model = new EditUserViewModel
+            {
+                UserId = user.UserId,
+                Name = user.Name,
+                Email = user.Email,
+                RoleId = user.RoleId,
+                DepartmentId = user.DepartmentId
+            };
+
+            LoadDropdownLists(user.RoleId, user.DepartmentId);
+
+            return View(model);
+        }
+
+        private void LoadDropdownLists(
+    int? selectedRoleId = null,
+    int? selectedDepartmentId = null)
         {
             List<Role> roles =
                 (from role in _context.Roles
@@ -137,13 +167,96 @@ namespace SalesPerformanceManagement.Controllers
                 new SelectList(
                     roles,
                     "RoleId",
-                    "RoleName");
+                    "RoleName",
+                    selectedRoleId);
 
             ViewBag.Departments =
                 new SelectList(
                     departments,
                     "DepartmentId",
-                    "DepartmentName");
+                    "DepartmentName",
+                    selectedDepartmentId);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(EditUserViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                LoadDropdownLists(model.RoleId, model.DepartmentId);
+                return View(model);
+            }
+
+            User? user =
+                (from existingUser in _context.Users
+                 where existingUser.UserId == model.UserId
+                 select existingUser)
+                .FirstOrDefault();
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            User? duplicateName =
+                (from existingUser in _context.Users
+                 where existingUser.Name == model.Name
+                    && existingUser.UserId != model.UserId
+                 select existingUser)
+                .FirstOrDefault();
+
+            if (duplicateName != null)
+            {
+                ModelState.AddModelError(
+                    "Name",
+                    "A user with this name already exists.");
+
+                LoadDropdownLists(model.RoleId, model.DepartmentId);
+
+                return View(model);
+            }
+
+            User? duplicateEmail =
+                (from existingUser in _context.Users
+                 where existingUser.Email == model.Email
+                    && existingUser.UserId != model.UserId
+                 select existingUser)
+                .FirstOrDefault();
+
+            if (duplicateEmail != null)
+            {
+                ModelState.AddModelError(
+                    "Email",
+                    "A user with this email already exists.");
+
+                LoadDropdownLists(model.RoleId, model.DepartmentId);
+
+                return View(model);
+            }
+
+            user.Name = model.Name;
+            user.Email = model.Email;
+            user.RoleId = model.RoleId;
+            user.DepartmentId = model.DepartmentId;
+
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                PasswordHasher<User> passwordHasher =
+                    new PasswordHasher<User>();
+
+                user.PasswordHash =
+                    passwordHasher.HashPassword(
+                        user,
+                        model.NewPassword);
+            }
+
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] =
+                "User account updated successfully.";
+
+            return RedirectToAction("Index");
         }
     }
 }
