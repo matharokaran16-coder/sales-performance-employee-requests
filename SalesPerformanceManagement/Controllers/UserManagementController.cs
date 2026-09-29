@@ -20,7 +20,27 @@ namespace SalesPerformanceManagement.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            List<User> users =
+                (from user in _context.Users
+                 join role in _context.Roles
+                     on user.RoleId equals role.RoleId
+                 join department in _context.Departments
+                     on user.DepartmentId equals department.DepartmentId
+                 orderby user.Name
+                 select new User
+                 {
+                     UserId = user.UserId,
+                     Name = user.Name,
+                     Email = user.Email,
+                     RoleId = user.RoleId,
+                     DepartmentId = user.DepartmentId,
+                     IsActive = user.IsActive,
+                     Role = role,
+                     Department = department
+                 })
+                .ToList();
+
+            return View(users);
         }
 
         [HttpGet]
