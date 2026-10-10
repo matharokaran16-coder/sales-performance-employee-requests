@@ -4,20 +4,20 @@
     ViewData["Title"] = "User Management";
 }
 
-<div class="container mt-4">
+<div class="user-management-page">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="user-management-header">
+
         <div>
             <h1>User Management</h1>
-            <p class="text-muted">
-                Manage employee accounts, roles and access.
-            </p>
+            <p>Manage employee accounts, roles and access.</p>
         </div>
 
         <a asp-action="Create"
-           class="btn btn-primary">
-            Create User
+           class="user-create-button">
+            + Create User
         </a>
+
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -27,14 +27,20 @@
         </div>
     }
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <div class="user-table-card">
 
-            <table class="table table-hover align-middle">
+        <div class="user-table-header">
+            <h3>Employees</h3>
+            <span>@Model.Count total users</span>
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="user-table">
 
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>Employee</th>
                         <th>Work Email</th>
                         <th>Role</th>
                         <th>Department</th>
@@ -48,33 +54,71 @@
                     @foreach (var user in Model)
                     {
                         <tr>
-                            <td>@user.Name</td>
-                            <td>@user.Email</td>
-                            <td>@user.Role?.RoleName</td>
-                            <td>@user.Department?.DepartmentName</td>
+
+                            <td>
+                                <div class="employee-name">
+                                    @user.Name
+                                </div>
+                            </td>
+
+                            <td>
+                                @user.Email
+                            </td>
+
+                            <td>
+                                <span class="role-label">
+                                    @user.Role?.RoleName
+                                </span>
+                            </td>
+
+                            <td>
+                                @user.Department?.DepartmentName
+                            </td>
 
                             <td>
                                 @if (user.IsActive)
                                 {
-                                    <span class="badge bg-success">
+                                    <span class="status-active">
                                         Active
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">
+                                    <span class="status-inactive">
                                         Inactive
                                     </span>
                                 }
                             </td>
 
                             <td>
-                                <a asp-action="Edit"
-                                   asp-route-id="@user.UserId"
-                                   class="btn btn-sm btn-outline-primary">
-                                    Edit
-                                </a>
+
+                                <div class="user-action-buttons">
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@user.UserId"
+                                       class="user-edit-button">
+                                        Edit
+                                    </a>
+
+                                    @if (user.IsActive)
+                                    {
+                                        <form asp-action="Deactivate"
+                                              asp-route-id="@user.UserId"
+                                              method="post"
+                                              class="deactivate-form">
+
+                                            <button type="submit"
+                                                    class="user-deactivate-button">
+                                                Deactivate
+                                            </button>
+
+                                        </form>
+                                    }
+
+                                </div>
+
                             </td>
+
                         </tr>
                     }
 
@@ -83,6 +127,7 @@
             </table>
 
         </div>
+
     </div>
 
 </div>
