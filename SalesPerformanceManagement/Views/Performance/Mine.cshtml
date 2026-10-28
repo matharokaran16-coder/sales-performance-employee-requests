@@ -1,0 +1,185 @@
+﻿@model SalesPerformanceManagement.ViewModels.EmployeePerformanceViewModel
+
+@{
+    ViewData["Title"] = "My Performance";
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2>My Performance</h2>
+
+        <p class="text-muted">
+            View your sales performance and assigned targets.
+        </p>
+    </div>
+
+    <div class="row mb-4">
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>Total Sales</h6>
+                    <h3>@Model.TotalSales.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>Target</h6>
+                    <h3>@Model.TotalTarget.ToString("N0")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h6>Target Completion</h6>
+
+                    <h3>
+                        @Model.TargetCompletionPercentage.ToString("N2")%
+                    </h3>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+
+                    <h6>Productivity Score</h6>
+
+                    <h3>
+                        @Model.ProductivityScore.ToString("N2")
+                    </h3>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    @{
+        decimal chartValue =
+            Model.TargetCompletionPercentage;
+
+        if (chartValue > 100)
+        {
+            chartValue = 100;
+        }
+
+        if (chartValue < 0)
+        {
+            chartValue = 0;
+        }
+    }
+
+    <div class="card mb-4">
+
+        <div class="card-body">
+
+            <h4>Performance Chart</h4>
+
+            <div class="progress"
+                 style="height: 35px;">
+
+                <div class="progress-bar"
+                     role="progressbar"
+                     style="width: @chartValue%;"
+                     aria-valuenow="@chartValue"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+
+                    @Model.TargetCompletionPercentage.ToString("N2")%
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <h4>Assigned Targets</h4>
+
+            @if (Model.AssignedTargets.Count == 0)
+            {
+                <div class="alert alert-info">
+                    No sales targets have been assigned.
+                </div>
+            }
+            else
+            {
+                <table class="table table-striped">
+
+                    <thead>
+                        <tr>
+                            <th>Target</th>
+                            <th>Timeframe</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var target in Model.AssignedTargets)
+                        {
+                            <tr>
+
+                                <td>
+                                    @target.TargetValue.ToString("N0")
+                                </td>
+
+                                <td>
+                                    @target.Timeframe
+                                </td>
+
+                                <td>
+                                    @target.StartDate.ToString("yyyy-MM-dd")
+                                </td>
+
+                                <td>
+                                    @target.EndDate.ToString("yyyy-MM-dd")
+                                </td>
+
+                                <td>
+
+                                    @if (target.IsActive)
+                                    {
+                                        <span class="badge bg-success">
+                                            Active
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            Inactive
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            }
+
+        </div>
+
+    </div>
+
+</div>

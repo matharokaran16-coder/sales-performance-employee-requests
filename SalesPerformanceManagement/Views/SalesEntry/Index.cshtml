@@ -1,0 +1,86 @@
+﻿@model List<SalesPerformanceManagement.Models.SalesEntry>
+
+@{
+    ViewData["Title"] = "Sales Entries";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Sales Entries</h2>
+            <p class="text-muted">
+                View and manage your recorded sales.
+            </p>
+        </div>
+
+        <a asp-controller="SalesEntry"
+           asp-action="Create"
+           class="btn btn-primary"
+           data-testid="add-sales-entry">
+            Add Sales Entry
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info">
+            No sales entries have been recorded yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Product Type</th>
+                        <th>Quantity</th>
+                        <th>Sale Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var entry in Model)
+                    {
+                        <tr>
+                            <td>
+                                @entry.ProductType
+                            </td>
+
+                            <td>
+                                @entry.Quantity
+                            </td>
+
+                            <td>
+                                @entry.SaleDate.ToString("yyyy-MM-dd")
+                            </td>
+
+                            <td>
+                                <a asp-controller="SalesEntry"
+                                   asp-action="Edit"
+                                   asp-route-id="@entry.SalesEntryId"
+                                   class="btn btn-sm btn-outline-primary"
+                                   data-testid="edit-sales-entry">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    }
+
+</div>

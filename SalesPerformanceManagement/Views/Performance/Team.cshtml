@@ -1,0 +1,106 @@
+﻿@model List<SalesPerformanceManagement.ViewModels.EmployeePerformanceViewModel>
+
+@{
+    ViewData["Title"] = "Team Performance";
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2>Team Performance</h2>
+        <p class="text-muted">
+            View sales performance for all active Sales Representatives.
+        </p>
+    </div>
+
+    @if (Model == null || Model.Count == 0)
+    {
+        <div class="alert alert-info">
+            No employee performance data is available.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+
+            <table class="table table-striped table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Total Sales</th>
+                        <th>Target</th>
+                        <th>Target Completion</th>
+                        <th>Productivity Score</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var employee in Model)
+                    {
+                        decimal progressValue = employee.TargetCompletionPercentage;
+
+                        if (progressValue < 0)
+                        {
+                            progressValue = 0;
+                        }
+
+                        if (progressValue > 100)
+                        {
+                            progressValue = 100;
+                        }
+
+                        <tr>
+
+                            <td>
+                                @employee.EmployeeName
+                            </td>
+
+                            <td>
+                                @employee.TotalSales.ToString("0")
+                            </td>
+
+                            <td>
+                                @employee.TotalTarget.ToString("0")
+                            </td>
+
+                            <td>
+                                @employee.TargetCompletionPercentage.ToString("0.00")%
+                            </td>
+
+                            <td>
+                                @employee.ProductivityScore.ToString("0.00")
+                            </td>
+
+                            <td style="min-width: 180px;">
+
+                                <div class="progress">
+
+                                    <div class="progress-bar"
+                                         role="progressbar"
+                                         style="width: @progressValue.ToString("0.##")%;"
+                                         aria-valuenow="@progressValue"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+
+                                        @employee.TargetCompletionPercentage.ToString("0.00")%
+
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+    }
+
+</div>
