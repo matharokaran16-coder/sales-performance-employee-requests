@@ -8,18 +8,20 @@ using System.Security.Claims;
 
 namespace SalesPerformanceManagement.Controllers
 {
-    // Only Managers are allowed to manage sales targets.
+    // This controller handles the Manager side of sales target management.
+    // A Manager can view, create, edit, assign, and delete sales targets.
     [Authorize(Roles = "Manager")]
     public class SalesTargetController : Controller
     {
         private readonly ApplicationDbContext _context;
 
+        // ASP.NET provides the database context through dependency injection.
         public SalesTargetController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // Displays all sales targets and the employee assigned to each target.
+        // Shows all sales targets and the Sales Rep assigned to each one.
         public IActionResult Index()
         {
             List<SalesTargetListViewModel> targets =
@@ -43,13 +45,14 @@ namespace SalesPerformanceManagement.Controllers
             return View(targets);
         }
 
-        // Displays the Create Sales Target form.
+        // Opens the Create Target page and loads the dropdown options.
         [HttpGet]
         public IActionResult Create()
         {
             LoadSalesRepresentatives();
             LoadTimeframes();
 
+            // Start both dates at today so the form has sensible defaults.
             CreateSalesTargetViewModel model =
                 new CreateSalesTargetViewModel
                 {
@@ -60,11 +63,12 @@ namespace SalesPerformanceManagement.Controllers
             return View(model);
         }
 
-        // Processes the submitted Create Sales Target form.
+        // Creates a new target using the values entered by the Manager.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(CreateSalesTargetViewModel model)
         {
+            // ModelState checks the validation rules from the ViewModel.
             if (!ModelState.IsValid)
             {
                 LoadSalesRepresentatives(model.SalesRepresentativeId);
@@ -73,7 +77,7 @@ namespace SalesPerformanceManagement.Controllers
                 return View(model);
             }
 
-            // Ensures the target ends after or on the start date.
+            // A target cannot end before it starts.
             if (model.EndDate < model.StartDate)
             {
                 ModelState.AddModelError(
@@ -86,7 +90,7 @@ namespace SalesPerformanceManagement.Controllers
                 return View(model);
             }
 
-            // Only allows the three timeframes required by the proposal.
+            // Only the three supported target periods are accepted.
             if (!IsValidTimeframe(model.Timeframe))
             {
                 ModelState.AddModelError(
@@ -99,7 +103,7 @@ namespace SalesPerformanceManagement.Controllers
                 return View(model);
             }
 
-            // Gets the currently logged-in Manager's UserId from the authentication claims.
+            // The Manager's UserId was stored in their claims at login.
             string? managerIdValue =
                 User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -110,7 +114,8 @@ namespace SalesPerformanceManagement.Controllers
                 return Forbid();
             }
 
-            // Makes sure the selected employee is an active Sales Representative.
+            // Make sure the selected employee exists, is active,
+            // and still has the Sales Representative role.
             User? salesRepresentative =
                 (from user in _context.Users
                  join role in _context.Roles
@@ -133,20 +138,21 @@ namespace SalesPerformanceManagement.Controllers
                 return View(model);
             }
 
-            // Creates the actual SalesTarget database record.
-            SalesTarget target = new SalesTarget
-            {
-                AssignedBy = managerId,
-                TargetValue = model.TargetValue,
-                Timeframe = model.Timeframe,
-                StartDate = model.StartDate,
-                EndDate = model.EndDate
-            };
+            // SalesTarget stores the actual target information.
+            SalesTarget target =
+                new SalesTarget
+                {
+                    AssignedBy = managerId,
+                    TargetValue = model.TargetValue,
+                    Timeframe = model.Timeframe,
+                    StartDate = model.StartDate,
+                    EndDate = model.EndDate
+                };
 
             _context.SalesTargets.Add(target);
             _context.SaveChanges();
 
-            // Links the newly created target to the selected Sales Representative.
+            // EmployeeTarget connects the target to the selected employee.
             EmployeeTarget employeeTarget =
                 new EmployeeTarget
                 {
@@ -163,10 +169,11 @@ namespace SalesPerformanceManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        // Displays the Edit Sales Target form.
+        // Opens the Edit page for an existing target.
         [HttpGet]
         public IActionResult Edit(int id)
         {
+            // Find the target using the ID from the URL.
             SalesTarget? target =
                 (from existingTarget in _context.SalesTargets
                  where existingTarget.TargetId == id
@@ -178,6 +185,7 @@ namespace SalesPerformanceManagement.Controllers
                 return NotFound();
             }
 
+            // The employee assignment is stored separately.
             EmployeeTarget? employeeTarget =
                 (from assignment in _context.EmployeeTargets
                  where assignment.TargetId == id
@@ -189,6 +197,7 @@ namespace SalesPerformanceManagement.Controllers
                 return NotFound();
             }
 
+            // Copy the current values into the Edit ViewModel.
             EditSalesTargetViewModel model =
                 new EditSalesTargetViewModel
                 {
@@ -200,27 +209,21 @@ namespace SalesPerformanceManagement.Controllers
                     EndDate = target.EndDate
                 };
 
-            LoadSalesRepresentatives(
-                employeeTarget.UserId);
-
-            LoadTimeframes(
-                target.Timeframe);
+            LoadSalesRepresentatives(employeeTarget.UserId);
+            LoadTimeframes(target.Timeframe);
 
             return View(model);
         }
 
-        // Processes changes to an existing sales target.
+        // Saves changes made to an existing target.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(EditSalesTargetViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                LoadSalesRepresentatives(
-                    model.SalesRepresentativeId);
-
-                LoadTimeframes(
-                    model.Timeframe);
+                LoadSalesRepresentatives(model.SalesRepresentativeId);
+                LoadTimeframes(model.Timeframe);
 
                 return View(model);
             }
@@ -231,30 +234,26 @@ namespace SalesPerformanceManagement.Controllers
                     "EndDate",
                     "End date cannot be before the start date.");
 
-                LoadSalesRepresentatives(
-                    model.SalesRepresentativeId);
-
-                LoadTimeframes(
-                    model.Timeframe);
+                LoadSalesRepresentatives(model.SalesRepresentativeId);
+                LoadTimeframes(model.Timeframe);
 
                 return View(model);
             }
 
+            // Validate the timeframe again on the server.
             if (!IsValidTimeframe(model.Timeframe))
             {
                 ModelState.AddModelError(
                     "Timeframe",
                     "Timeframe must be Daily, Weekly, or Monthly.");
 
-                LoadSalesRepresentatives(
-                    model.SalesRepresentativeId);
-
-                LoadTimeframes(
-                    model.Timeframe);
+                LoadSalesRepresentatives(model.SalesRepresentativeId);
+                LoadTimeframes(model.Timeframe);
 
                 return View(model);
             }
 
+            // Load the target being edited.
             SalesTarget? target =
                 (from existingTarget in _context.SalesTargets
                  where existingTarget.TargetId == model.TargetId
@@ -266,6 +265,7 @@ namespace SalesPerformanceManagement.Controllers
                 return NotFound();
             }
 
+            // Load the employee assignment connected to this target.
             EmployeeTarget? employeeTarget =
                 (from assignment in _context.EmployeeTargets
                  where assignment.TargetId == model.TargetId
@@ -277,6 +277,7 @@ namespace SalesPerformanceManagement.Controllers
                 return NotFound();
             }
 
+            // Make sure the newly selected employee is still valid.
             User? salesRepresentative =
                 (from user in _context.Users
                  join role in _context.Roles
@@ -293,24 +294,20 @@ namespace SalesPerformanceManagement.Controllers
                     "SalesRepresentativeId",
                     "Please select a valid Sales Representative.");
 
-                LoadSalesRepresentatives(
-                    model.SalesRepresentativeId);
-
-                LoadTimeframes(
-                    model.Timeframe);
+                LoadSalesRepresentatives(model.SalesRepresentativeId);
+                LoadTimeframes(model.Timeframe);
 
                 return View(model);
             }
 
-            // Updates the target values.
+            // Update the target information.
             target.TargetValue = model.TargetValue;
             target.Timeframe = model.Timeframe;
             target.StartDate = model.StartDate;
             target.EndDate = model.EndDate;
 
-            // Updates which Sales Representative the target belongs to.
-            employeeTarget.UserId =
-                model.SalesRepresentativeId;
+            // Update the employee assignment if it was changed.
+            employeeTarget.UserId = model.SalesRepresentativeId;
 
             _context.SaveChanges();
 
@@ -320,7 +317,7 @@ namespace SalesPerformanceManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        // Deletes a sales target.
+        // Deletes a target and its employee assignment.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
@@ -336,24 +333,20 @@ namespace SalesPerformanceManagement.Controllers
                 return NotFound();
             }
 
-            // Finds the employee assignment before deleting the target.
+            // Find the employee-target relationship first.
             EmployeeTarget? employeeTarget =
                 (from assignment in _context.EmployeeTargets
                  where assignment.TargetId == id
                  select assignment)
                 .FirstOrDefault();
 
-            // Removes the linking record first.
+            // Remove the relationship before deleting the target.
             if (employeeTarget != null)
             {
-                _context.EmployeeTargets.Remove(
-                    employeeTarget);
+                _context.EmployeeTargets.Remove(employeeTarget);
             }
 
-            // Removes the sales target itself.
-            _context.SalesTargets.Remove(
-                target);
-
+            _context.SalesTargets.Remove(target);
             _context.SaveChanges();
 
             TempData["SuccessMessage"] =
@@ -362,9 +355,9 @@ namespace SalesPerformanceManagement.Controllers
             return RedirectToAction("Index");
         }
 
-        // Loads active Sales Representatives for the Create/Edit dropdown.
-        private void LoadSalesRepresentatives(
-            int? selectedUserId = null)
+        // Loads active Sales Reps for the Create/Edit dropdown.
+        // selectedUserId keeps the current employee selected if needed.
+        private void LoadSalesRepresentatives(int? selectedUserId = null)
         {
             List<User> salesRepresentatives =
                 (from user in _context.Users
@@ -384,9 +377,8 @@ namespace SalesPerformanceManagement.Controllers
                     selectedUserId);
         }
 
-        // Loads the three target timeframes required by the proposal.
-        private void LoadTimeframes(
-            string? selectedTimeframe = null)
+        // Loads the three target periods supported by the project.
+        private void LoadTimeframes(string? selectedTimeframe = null)
         {
             List<string> timeframes =
                 new List<string>
@@ -402,9 +394,8 @@ namespace SalesPerformanceManagement.Controllers
                     selectedTimeframe);
         }
 
-        // Validates that only an approved timeframe can be stored.
-        private bool IsValidTimeframe(
-            string timeframe)
+        // Shared server-side check used by both Create and Edit.
+        private bool IsValidTimeframe(string timeframe)
         {
             if (timeframe == "Daily")
             {
