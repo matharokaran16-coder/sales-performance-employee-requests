@@ -1,16 +1,43 @@
-﻿@model List<SalesPerformanceManagement.ViewModels.EmployeePerformanceViewModel>
+﻿@using System.Globalization
+@model List<SalesPerformanceManagement.ViewModels.EmployeePerformanceViewModel>
 
 @{
     ViewData["Title"] = "Team Performance";
+
+    int employeeCount = Model?.Count ?? 0;
+    decimal teamTotalSales = 0;
+    decimal teamTotalTarget = 0;
+    decimal totalProductivity = 0;
+    decimal chartMaximum = 0;
+
+    if (Model != null)
+    {
+        foreach (var employee in Model)
+        {
+            teamTotalSales += employee.TotalSales;
+            teamTotalTarget += employee.TotalTarget;
+            totalProductivity += employee.ProductivityScore;
+
+            if (employee.TotalSales > chartMaximum)
+            {
+                chartMaximum = employee.TotalSales;
+            }
+
+            if (employee.TotalTarget > chartMaximum)
+            {
+                chartMaximum = employee.TotalTarget;
+            }
+        }
+    }
+
+    decimal averageProductivity = employeeCount > 0 ? totalProductivity / employeeCount : 0;
 }
 
 <div class="container mt-4">
 
     <div class="mb-4">
-        <h2>Team Performance</h2>
-        <p class="text-muted">
-            View sales performance for all active Sales Representatives.
-        </p>
+        <h2 class="fw-bold mb-1">Team Performance</h2>
+        <p class="text-muted">Monitor sales performance, assigned targets, and productivity across your team.</p>
     </div>
 
     @if (Model == null || Model.Count == 0)
@@ -21,85 +48,195 @@
     }
     else
     {
-        <div class="table-responsive">
+        @* Team performance summary cards *@
+        <div class="row g-3 mb-4">
 
-            <table class="table table-striped table-hover align-middle">
+            <div class="col-md-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h6 class="text-muted mb-3">Sales Representatives</h6>
+                        <h2 class="fw-bold mb-0">@employeeCount</h2>
+                        <small class="text-muted">Active team members</small>
+                    </div>
+                </div>
+            </div>
 
-                <thead>
-                    <tr>
-                        <th>Employee</th>
-                        <th>Total Sales</th>
-                        <th>Target</th>
-                        <th>Target Completion</th>
-                        <th>Productivity Score</th>
-                        <th>Progress</th>
-                    </tr>
-                </thead>
+            <div class="col-md-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h6 class="text-muted mb-3">Team Total Sales</h6>
+                        <h2 class="fw-bold mb-0">@teamTotalSales.ToString("N0")</h2>
+                        <small class="text-muted">Sales counted in active target periods</small>
+                    </div>
+                </div>
+            </div>
 
-                <tbody>
+            <div class="col-md-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h6 class="text-muted mb-3">Combined Target</h6>
+                        <h2 class="fw-bold mb-0">@teamTotalTarget.ToString("N0")</h2>
+                        <small class="text-muted">Total active sales targets</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-3">
+                <div class="card shadow-sm border-0 h-100">
+                    <div class="card-body p-4">
+                        <h6 class="text-muted mb-3">Average Productivity</h6>
+                        <h2 class="fw-bold mb-0">@averageProductivity.ToString("N2")</h2>
+                        <small class="text-muted">Average score out of 100</small>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        @* Graphical comparison of employee sales and assigned targets *@
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+
+                <h4 class="mb-1">Team Sales vs Targets</h4>
+                <p class="text-muted mb-4">Compare recorded sales and assigned targets for each Sales Representative.</p>
+
+                @if (chartMaximum <= 0)
+                {
+                    <div class="alert alert-info mb-0">
+                        No active sales target data is available for the chart.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-wrap gap-4 mb-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="bg-primary rounded" style="display: inline-block; width: 14px; height: 14px;"></span>
+                            <span>Total Sales</span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="bg-secondary rounded" style="display: inline-block; width: 14px; height: 14px;"></span>
+                            <span>Assigned Target</span>
+                        </div>
+                    </div>
 
                     @foreach (var employee in Model)
                     {
-                        decimal progressValue = employee.TargetCompletionPercentage;
+                        decimal salesValue = Math.Max(0, employee.TotalSales);
+                        decimal targetValue = Math.Max(0, employee.TotalTarget);
 
-                        if (progressValue < 0)
-                        {
-                            progressValue = 0;
-                        }
+                        decimal salesWidth = Math.Round(salesValue / chartMaximum * 100, 2);
+                        decimal targetWidth = Math.Round(targetValue / chartMaximum * 100, 2);
 
-                        if (progressValue > 100)
-                        {
-                            progressValue = 100;
-                        }
+                        string salesBarStyle = "width: " + salesWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%;";
+                        string targetBarStyle = "width: " + targetWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%;";
 
-                        <tr>
+                        <div class="mb-4">
 
-                            <td>
-                                @employee.EmployeeName
-                            </td>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="fw-bold mb-0">@employee.EmployeeName</h6>
+                                <span class="text-muted">@employee.TargetCompletionPercentage.ToString("N2")% completion</span>
+                            </div>
 
-                            <td>
-                                @employee.TotalSales.ToString("0")
-                            </td>
-
-                            <td>
-                                @employee.TotalTarget.ToString("0")
-                            </td>
-
-                            <td>
-                                @employee.TargetCompletionPercentage.ToString("0.00")%
-                            </td>
-
-                            <td>
-                                @employee.ProductivityScore.ToString("0.00")
-                            </td>
-
-                            <td style="min-width: 180px;">
-
-                                <div class="progress">
-
-                                    <div class="progress-bar"
-                                         role="progressbar"
-                                         style="width: @progressValue.ToString("0.##")%;"
-                                         aria-valuenow="@progressValue"
-                                         aria-valuemin="0"
-                                         aria-valuemax="100">
-
-                                        @employee.TargetCompletionPercentage.ToString("0.00")%
-
-                                    </div>
-
+                            <div class="row align-items-center g-2 mb-2">
+                                <div class="col-md-2">
+                                    <small class="text-muted">Sales</small>
                                 </div>
 
-                            </td>
+                                <div class="col-md-8">
+                                    <div class="progress" style="height: 24px;">
+                                        <div class="progress-bar bg-primary" role="progressbar" style="@salesBarStyle" aria-label="Sales for @employee.EmployeeName" aria-valuenow="@salesWidth" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
 
-                        </tr>
+                                <div class="col-md-2 text-md-end">
+                                    <span class="fw-semibold">@employee.TotalSales.ToString("N0")</span>
+                                </div>
+                            </div>
+
+                            <div class="row align-items-center g-2">
+                                <div class="col-md-2">
+                                    <small class="text-muted">Target</small>
+                                </div>
+
+                                <div class="col-md-8">
+                                    <div class="progress" style="height: 24px;">
+                                        <div class="progress-bar bg-secondary" role="progressbar" style="@targetBarStyle" aria-label="Target for @employee.EmployeeName" aria-valuenow="@targetWidth" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 text-md-end">
+                                    <span class="fw-semibold">@employee.TotalTarget.ToString("N0")</span>
+                                </div>
+                            </div>
+
+                        </div>
                     }
+                }
 
-                </tbody>
+            </div>
+        </div>
 
-            </table>
+        @* Detailed table for all active Sales Representatives *@
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
 
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Employee Performance Details</h4>
+                    <span class="text-muted">@employeeCount employee(s)</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Employee</th>
+                                <th>Total Sales</th>
+                                <th>Target</th>
+                                <th>Target Completion</th>
+                                <th>Productivity Score</th>
+                                <th>Progress</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var employee in Model)
+                            {
+                                decimal progressValue = Math.Max(0, Math.Min(100, employee.TargetCompletionPercentage));
+                                string progressStyle = "width: " + progressValue.ToString("0.##", CultureInfo.InvariantCulture) + "%;";
+
+                                <tr>
+                                    <td class="fw-semibold">@employee.EmployeeName</td>
+                                    <td>@employee.TotalSales.ToString("N0")</td>
+                                    <td>@employee.TotalTarget.ToString("N0")</td>
+                                    <td>@employee.TargetCompletionPercentage.ToString("N2")%</td>
+                                    <td>@employee.ProductivityScore.ToString("N2")</td>
+
+                                    <td style="min-width: 190px;">
+                                        <div class="progress" style="height: 26px;">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="@progressStyle" aria-label="Target completion for @employee.EmployeeName" aria-valuenow="@progressValue" aria-valuemin="0" aria-valuemax="100">
+                                                @progressValue.ToString("N2")%
+                                            </div>
+                                        </div>
+
+                                        @if (employee.TargetCompletionPercentage > 100)
+                                        {
+                                            <small class="text-success fw-semibold">Target exceeded</small>
+                                        }
+                                        else if (employee.TotalTarget <= 0)
+                                        {
+                                            <small class="text-muted">No active target</small>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
         </div>
     }
 

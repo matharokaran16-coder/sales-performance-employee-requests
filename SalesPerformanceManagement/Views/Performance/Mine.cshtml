@@ -1,185 +1,220 @@
-﻿@model SalesPerformanceManagement.ViewModels.EmployeePerformanceViewModel
+﻿@using System.Globalization
+@model SalesPerformanceManagement.ViewModels.EmployeePerformanceViewModel
 
 @{
     ViewData["Title"] = "My Performance";
+
+    decimal totalSales = Math.Max(0, Model.TotalSales);
+    decimal totalTarget = Math.Max(0, Model.TotalTarget);
+    decimal chartMax = Math.Max(totalSales, totalTarget);
+
+    decimal salesBarWidth = chartMax > 0 ? Math.Round(totalSales / chartMax * 100, 2) : 0;
+    decimal targetBarWidth = chartMax > 0 ? Math.Round(totalTarget / chartMax * 100, 2) : 0;
+
+    decimal completionValue = Math.Max(0, Math.Min(100, Model.TargetCompletionPercentage));
+
+    string salesBarStyle = "width: " + salesBarWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%;";
+    string targetBarStyle = "width: " + targetBarWidth.ToString("0.##", CultureInfo.InvariantCulture) + "%;";
+    string completionStyle = "width: " + completionValue.ToString("0.##", CultureInfo.InvariantCulture) + "%;";
 }
 
 <div class="container mt-4">
 
     <div class="mb-4">
-        <h2>My Performance</h2>
-
-        <p class="text-muted">
-            View your sales performance and assigned targets.
-        </p>
+        <h2 class="fw-bold mb-1">My Performance</h2>
+        <p class="text-muted">Track your sales, target completion, productivity, and assigned targets.</p>
     </div>
 
-    <div class="row mb-4">
+    @* Performance summary cards *@
+    <div class="row g-3 mb-4">
 
-        <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h6>Total Sales</h6>
-                    <h3>@Model.TotalSales.ToString("N0")</h3>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">Total Sales</h6>
+                    <h2 class="fw-bold mb-0">@Model.TotalSales.ToString("N0")</h2>
+                    <small class="text-muted">During active target period</small>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h6>Target</h6>
-                    <h3>@Model.TotalTarget.ToString("N0")</h3>
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">Assigned Target</h6>
+                    <h2 class="fw-bold mb-0">@Model.TotalTarget.ToString("N0")</h2>
+                    <small class="text-muted">Current active target</small>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-
-                    <h6>Target Completion</h6>
-
-                    <h3>
-                        @Model.TargetCompletionPercentage.ToString("N2")%
-                    </h3>
-
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">Target Completion</h6>
+                    <h2 class="fw-bold mb-0">@Model.TargetCompletionPercentage.ToString("N2")%</h2>
+                    <small class="text-muted">Percentage of target achieved</small>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card h-100">
-                <div class="card-body">
-
-                    <h6>Productivity Score</h6>
-
-                    <h3>
-                        @Model.ProductivityScore.ToString("N2")
-                    </h3>
-
+        <div class="col-md-6 col-xl-3">
+            <div class="card shadow-sm h-100 border-0">
+                <div class="card-body p-4">
+                    <h6 class="text-muted mb-3">Productivity Score</h6>
+                    <h2 class="fw-bold mb-0">@Model.ProductivityScore.ToString("N2")</h2>
+                    <small class="text-muted">Score out of 100</small>
                 </div>
             </div>
         </div>
 
     </div>
 
-    @{
-        decimal chartValue =
-            Model.TargetCompletionPercentage;
+    @* Graphical comparison of total sales against the assigned target *@
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
 
-        if (chartValue > 100)
-        {
-            chartValue = 100;
-        }
+            <h4 class="mb-1">Sales vs Target</h4>
+            <p class="text-muted mb-4">Compare your recorded sales against your active sales target.</p>
 
-        if (chartValue < 0)
-        {
-            chartValue = 0;
-        }
-    }
-
-    <div class="card mb-4">
-
-        <div class="card-body">
-
-            <h4>Performance Chart</h4>
-
-            <div class="progress"
-                 style="height: 35px;">
-
-                <div class="progress-bar"
-                     role="progressbar"
-                     style="width: @chartValue%;"
-                     aria-valuenow="@chartValue"
-                     aria-valuemin="0"
-                     aria-valuemax="100">
-
-                    @Model.TargetCompletionPercentage.ToString("N2")%
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <div class="card-body">
-
-            <h4>Assigned Targets</h4>
-
-            @if (Model.AssignedTargets.Count == 0)
+            @if (chartMax <= 0)
             {
-                <div class="alert alert-info">
-                    No sales targets have been assigned.
+                <div class="alert alert-info mb-0">
+                    No active target data is available for the chart.
                 </div>
             }
             else
             {
-                <table class="table table-striped">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-semibold">Total Sales</span>
+                        <span class="fw-semibold">@Model.TotalSales.ToString("N0")</span>
+                    </div>
 
-                    <thead>
-                        <tr>
-                            <th>Target</th>
-                            <th>Timeframe</th>
-                            <th>Start</th>
-                            <th>End</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="@salesBarStyle" aria-label="Total sales relative to chart maximum" aria-valuenow="@salesBarWidth" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
 
-                    <tbody>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-semibold">Assigned Target</span>
+                        <span class="fw-semibold">@Model.TotalTarget.ToString("N0")</span>
+                    </div>
 
-                        @foreach (var target in Model.AssignedTargets)
-                        {
-                            <tr>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-secondary" role="progressbar" style="@targetBarStyle" aria-label="Assigned target relative to chart maximum" aria-valuenow="@targetBarWidth" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
 
-                                <td>
-                                    @target.TargetValue.ToString("N0")
-                                </td>
+                <div class="d-flex flex-wrap gap-4 mt-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="bg-primary rounded" style="display: inline-block; width: 14px; height: 14px;"></span>
+                        <span class="text-muted">Total Sales</span>
+                    </div>
 
-                                <td>
-                                    @target.Timeframe
-                                </td>
-
-                                <td>
-                                    @target.StartDate.ToString("yyyy-MM-dd")
-                                </td>
-
-                                <td>
-                                    @target.EndDate.ToString("yyyy-MM-dd")
-                                </td>
-
-                                <td>
-
-                                    @if (target.IsActive)
-                                    {
-                                        <span class="badge bg-success">
-                                            Active
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">
-                                            Inactive
-                                        </span>
-                                    }
-
-                                </td>
-
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="bg-secondary rounded" style="display: inline-block; width: 14px; height: 14px;"></span>
+                        <span class="text-muted">Assigned Target</span>
+                    </div>
+                </div>
             }
 
         </div>
+    </div>
 
+    @* Target completion chart *@
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">Target Completion</h4>
+                <span class="fw-bold">@Model.TargetCompletionPercentage.ToString("N2")%</span>
+            </div>
+
+            <div class="progress" style="height: 35px;">
+                <div class="progress-bar bg-success fw-semibold" role="progressbar" style="@completionStyle" aria-label="Target completion percentage capped at 100 for display" aria-valuenow="@completionValue" aria-valuemin="0" aria-valuemax="100">
+                    @completionValue.ToString("N2")%
+                </div>
+            </div>
+
+            @if (Model.TargetCompletionPercentage > 100)
+            {
+                <p class="text-success mt-3 mb-0 fw-semibold">
+                    You have exceeded your assigned sales target.
+                </p>
+            }
+            else if (Model.TotalTarget <= 0)
+            {
+                <p class="text-muted mt-3 mb-0">
+                    No active sales target is currently assigned.
+                </p>
+            }
+            else
+            {
+                <p class="text-muted mt-3 mb-0">
+                    Your progress is calculated from sales recorded during the active target period.
+                </p>
+            }
+
+        </div>
+    </div>
+
+    @* List of all assigned sales targets *@
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+
+            <h4 class="mb-4">Assigned Targets</h4>
+
+            @if (Model.AssignedTargets.Count == 0)
+            {
+                <div class="alert alert-info mb-0">
+                    No sales targets have been assigned to your account.
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>Target</th>
+                                <th>Timeframe</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var target in Model.AssignedTargets)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@target.TargetValue.ToString("N0")</td>
+                                    <td>@target.Timeframe</td>
+                                    <td>@target.StartDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@target.EndDate.ToString("yyyy-MM-dd")</td>
+
+                                    <td>
+                                        @if (target.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            }
+
+        </div>
     </div>
 
 </div>

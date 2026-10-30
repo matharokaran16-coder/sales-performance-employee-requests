@@ -20,8 +20,7 @@ namespace SalesPerformanceManagement.Controllers
             _context = context;
         }
 
-        // Shows only the sales entries that belong to the
-        // currently logged-in Sales Representative.
+        // Shows only the sales entries that belong to the currently logged-in Sales Representative.
         public IActionResult Index()
         {
             int? currentUserId = GetCurrentUserId();
@@ -31,14 +30,11 @@ namespace SalesPerformanceManagement.Controllers
                 return Forbid();
             }
 
-            // Filtering by UserId makes sure one Sales Rep
-            // cannot see another employee's sales.
-            List<SalesEntry> salesEntries =
-                (from entry in _context.SalesEntries
-                 where entry.UserId == currentUserId.Value
-                 orderby entry.SaleDate descending
-                 select entry)
-                .ToList();
+            // Filtering by UserId makes sure one Sales Rep cannot see another employee's sales.
+            List<SalesEntry> salesEntries = (from entry in _context.SalesEntries
+                                             where entry.UserId == currentUserId.Value
+                                             orderby entry.SaleDate descending
+                                             select entry).ToList();
 
             return View(salesEntries);
         }
@@ -48,11 +44,10 @@ namespace SalesPerformanceManagement.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            CreateSalesEntryViewModel model =
-                new CreateSalesEntryViewModel
-                {
-                    SaleDate = DateTime.Today
-                };
+            CreateSalesEntryViewModel model = new CreateSalesEntryViewModel
+            {
+                SaleDate = DateTime.Today
+            };
 
             return View(model);
         }
@@ -77,20 +72,18 @@ namespace SalesPerformanceManagement.Controllers
 
             // The employee does not choose their UserId manually.
             // I automatically use the ID of the logged-in account.
-            SalesEntry salesEntry =
-                new SalesEntry
-                {
-                    UserId = currentUserId.Value,
-                    ProductType = model.ProductType,
-                    Quantity = model.Quantity,
-                    SaleDate = model.SaleDate
-                };
+            SalesEntry salesEntry = new SalesEntry
+            {
+                UserId = currentUserId.Value,
+                ProductType = model.ProductType,
+                Quantity = model.Quantity,
+                SaleDate = model.SaleDate
+            };
 
             _context.SalesEntries.Add(salesEntry);
             _context.SaveChanges();
 
-            TempData["SuccessMessage"] =
-                "Sales entry recorded successfully.";
+            TempData["SuccessMessage"] = "Sales entry recorded successfully.";
 
             return RedirectToAction("Index");
         }
@@ -107,14 +100,10 @@ namespace SalesPerformanceManagement.Controllers
             }
 
             // I check both the SalesEntryId and UserId.
-            // This stops someone from changing the URL and
-            // editing another employee's sales entry.
-            SalesEntry? salesEntry =
-                (from entry in _context.SalesEntries
-                 where entry.SalesEntryId == id
-                       && entry.UserId == currentUserId.Value
-                 select entry)
-                .FirstOrDefault();
+            // This stops someone from changing the URL and editing another employee's sales entry.
+            SalesEntry? salesEntry = (from entry in _context.SalesEntries
+                                      where entry.SalesEntryId == id && entry.UserId == currentUserId.Value
+                                      select entry).FirstOrDefault();
 
             if (salesEntry == null)
             {
@@ -122,14 +111,13 @@ namespace SalesPerformanceManagement.Controllers
             }
 
             // Copy the current database values into the Edit ViewModel.
-            EditSalesEntryViewModel model =
-                new EditSalesEntryViewModel
-                {
-                    SalesEntryId = salesEntry.SalesEntryId,
-                    ProductType = salesEntry.ProductType,
-                    Quantity = salesEntry.Quantity,
-                    SaleDate = salesEntry.SaleDate
-                };
+            EditSalesEntryViewModel model = new EditSalesEntryViewModel
+            {
+                SalesEntryId = salesEntry.SalesEntryId,
+                ProductType = salesEntry.ProductType,
+                Quantity = salesEntry.Quantity,
+                SaleDate = salesEntry.SaleDate
+            };
 
             return View(model);
         }
@@ -151,14 +139,10 @@ namespace SalesPerformanceManagement.Controllers
                 return Forbid();
             }
 
-            // Important security check:
-            // the entry must exist AND belong to the logged-in employee.
-            SalesEntry? salesEntry =
-                (from entry in _context.SalesEntries
-                 where entry.SalesEntryId == model.SalesEntryId
-                       && entry.UserId == currentUserId.Value
-                 select entry)
-                .FirstOrDefault();
+            // Important security check: the entry must exist and belong to the logged-in employee.
+            SalesEntry? salesEntry = (from entry in _context.SalesEntries
+                                      where entry.SalesEntryId == model.SalesEntryId && entry.UserId == currentUserId.Value
+                                      select entry).FirstOrDefault();
 
             if (salesEntry == null)
             {
@@ -172,8 +156,7 @@ namespace SalesPerformanceManagement.Controllers
 
             _context.SaveChanges();
 
-            TempData["SuccessMessage"] =
-                "Sales entry updated successfully.";
+            TempData["SuccessMessage"] = "Sales entry updated successfully.";
 
             return RedirectToAction("Index");
         }
@@ -182,9 +165,7 @@ namespace SalesPerformanceManagement.Controllers
         // This value was stored in the NameIdentifier claim at login.
         private int? GetCurrentUserId()
         {
-            string? userIdValue =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
-
+            string? userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
             int userId;
 
             // If the claim is missing or invalid, treat the user as unauthorized.

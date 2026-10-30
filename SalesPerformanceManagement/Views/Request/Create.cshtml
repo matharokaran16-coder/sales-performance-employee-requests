@@ -1,0 +1,59 @@
+﻿@model SalesPerformanceManagement.ViewModels.CreateRequestViewModel
+
+@{
+    ViewData["Title"] = "Submit Request";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="mb-4">
+                <h2 class="mb-1">Submit Request</h2>
+                <p class="text-muted mb-0">Submit a leave or shift change request for Manager approval.</p>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-controller="Request" asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="RequestTypeId" class="form-label"></label>
+
+                            <select asp-for="RequestTypeId" asp-items="ViewBag.RequestTypes" class="form-select">
+                                <option value="">Select request type</option>
+                            </select>
+
+                            <span asp-validation-for="RequestTypeId" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label"></label>
+
+                            <textarea asp-for="Description" class="form-control" rows="5" placeholder="Explain your request..."></textarea>
+
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                Submit Request
+                            </button>
+
+                            <a asp-controller="Request" asp-action="Mine" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

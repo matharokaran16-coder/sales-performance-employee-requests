@@ -1,0 +1,91 @@
+﻿@model List<SalesPerformanceManagement.ViewModels.RequestListViewModel>
+
+@{
+    ViewData["Title"] = "My Requests";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">My Requests</h2>
+            <p class="text-muted mb-0">Submit and track your leave and shift change requests.</p>
+        </div>
+
+        <a asp-controller="Request" asp-action="Create" class="btn btn-primary">
+            New Request
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (Model.Count == 0)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h5>No requests yet</h5>
+                <p class="text-muted mb-3">You have not submitted any employee requests.</p>
+
+                <a asp-controller="Request" asp-action="Create" class="btn btn-primary">
+                    Submit Your First Request
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Request Type</th>
+                                <th>Description</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var request in Model)
+                            {
+                                string badgeClass = "bg-secondary";
+
+                                if (request.StatusName == "Pending")
+                                {
+                                    badgeClass = "bg-warning text-dark";
+                                }
+
+                                if (request.StatusName == "Approved")
+                                {
+                                    badgeClass = "bg-success";
+                                }
+
+                                if (request.StatusName == "Rejected")
+                                {
+                                    badgeClass = "bg-danger";
+                                }
+
+                                <tr>
+                                    <td>@request.RequestTypeName</td>
+                                    <td>@request.Description</td>
+                                    <td>@request.CreatedDate.ToString("MMM dd, yyyy h:mm tt")</td>
+                                    <td>
+                                        <span class="badge @badgeClass">
+                                            @request.StatusName
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
